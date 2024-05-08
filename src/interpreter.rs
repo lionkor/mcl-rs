@@ -1,3 +1,5 @@
+use crate::instr::Instr;
+
 
 enum Value {
     Integer(i64),
@@ -18,14 +20,18 @@ impl VM {
         Self { stack: Stack { data: Vec::new() }, bytecode: vec![] }
     }
 
-    pub fn execute(mut self, bytecode: Vec<u64>) -> anyhow::Result<()> {
-        for raw_instr in bytecode {
-            let op = (raw_instr & 0xFF00_0000_0000_0000) >> (64 - 8);
-            let value = raw_instr & 0x00FF_FFFF_FFFF_FFFF;
-            match op {
-                1 => {
-                    println!("push {}", value);
-                }
+    pub fn execute(mut self, bytecode: Vec<Instr>) -> anyhow::Result<()> {
+        for instr in bytecode {
+            match instr.op {
+                crate::op::Op::Push => {
+                    println!("push {}", instr.value);
+                },
+                crate::op::Op::Pop => {
+                    println!("pop {}", instr.value);
+                },
+                crate::op::Op::Print => {
+                    println!("print");
+                },
                 _ => panic!("Invalid instruction!"),
             }
         }

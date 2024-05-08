@@ -1,4 +1,5 @@
 mod compiler;
+mod instr;
 mod interpreter;
 mod op;
 
@@ -19,15 +20,18 @@ struct Args {
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
-    let mut bytecode = vec![0x01 << 56];
+    let mut bytecode = vec![];
 
     if args.compile {
-        bytecode = compiler::compile(r#"
+        bytecode = compiler::compile(
+            r#"
         push 2
         push 1
         print
         print
-        "#)?;
+        "#,
+        )
+        .unwrap();
     }
 
     if args.exec {

@@ -1,4 +1,4 @@
-use crate::op::Op;
+use crate::{op::Op, instr::Instr};
 
 #[derive(Debug)]
 enum Token {
@@ -34,8 +34,36 @@ fn tokenize(content: &str) -> Result<Vec<Token>, String> {
     Ok(result)
 }
 
-pub fn compile(content: &str) -> anyhow::Result<Vec<u64>> {
-    let tokens = tokenize(content);
+fn compile_to_instrs(tokens: &[Token]) -> Result<Vec<Instr>, String> {
+    let mut result: Vec<Instr> = Vec::new();
+    let mut tail = tokens;
+    loop {
+        if tail.is_empty() {
+            break;
+        }
+        match tail {
+            [Token::Op(Op::Push), Token::Value(value), rest @ ..] => {
+                tail = rest;
+                result.push(Instr { op: Op::Push, value: *value })
+            }
+            [Token::Op(Op::Pop), Token::Value(value), rest @ ..] => {
+                tail = rest;
+                result.push(Instr { op: Op::Pop, value: *value })
+            }
+            [Token::Op(Op::Print), rest @ ..] => {
+                tail = rest;
+                result.push(Instr { op: Op::Print, value: 0 })
+            }
+            tok => return Err(format!("Invalid token! Expected Op, got '{:?}'", tok)),
+        }
+    }
+    Ok(result)
+}
+
+pub fn compile(content: &str) -> Result<Vec<Instr>, String> {
+    let tokens = tokenize(content)?;
     println!("{:#?}", tokens);
-    Ok(vec![])
+    let instrs = compile_to_instrs(&tokens)?;
+    println!("{:#?}", instrs);
+    Ok(instrs)
 }
