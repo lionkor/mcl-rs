@@ -51,7 +51,7 @@ fn main() -> anyhow::Result<()> {
             }
             bytecode = interpreter::decode_instructions(fs::read(&args.file)?)?;
         }
-        let vm = interpreter::VM::new();
+        let mut vm = interpreter::VM::new();
         vm.execute(bytecode)?;
     } else {
         // create bytecode file

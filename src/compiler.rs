@@ -16,6 +16,7 @@ fn tokenize(content: &str) -> Result<Vec<Token>, String> {
             "push" => Token::Op(Op::Push),
             "pop" => Token::Op(Op::Pop),
             "print" => Token::Op(Op::Print),
+            "add" => Token::Op(Op::Add),
             val => {
                 if let Ok(int) = i64::from_str_radix(val, 10) {
                     Token::Value(int)
@@ -46,9 +47,13 @@ fn compile_to_instrs(tokens: &[Token]) -> Result<Vec<Instr>, String> {
                 tail = rest;
                 result.push(Instr { op: Op::Push, value: *value })
             }
-            [Token::Op(Op::Pop), Token::Value(value), rest @ ..] => {
+            [Token::Op(Op::Pop), rest @ ..] => {
                 tail = rest;
-                result.push(Instr { op: Op::Pop, value: *value })
+                result.push(Instr { op: Op::Pop, value: 0 })
+            }
+            [Token::Op(Op::Add), rest @ ..] => {
+                tail = rest;
+                result.push(Instr { op: Op::Add, value: 0 })
             }
             [Token::Op(Op::Print), rest @ ..] => {
                 tail = rest;

@@ -3,7 +3,37 @@ use strum::FromRepr;
 #[derive(Debug, FromRepr, Copy, Clone)]
 #[repr(u8)]
 pub enum Op {
-    Push = 0x01,
-    Pop = 0x02,
-    Print = 0x03,
+    Pop = 0x01,
+    Add,
+    Inc,
+    Dec,
+    Sub,
+    Mul,
+    Div,
+    Mod,
+    Print,
+    Halt,
+    Dup,
+    Dup2,
+    Swap,
+    Clear,
+    Over,
+
+    // with string argument
+    // NONE
+
+    // with argument
+    Push,
+
+    // keep these at the end
+    Je,
+    Jn,
+    Jg,
+    Jl,
+    Jge,
+    Jle,
+    Jmp,
+    // special
+    Jz,
+    Jnz,
 }
