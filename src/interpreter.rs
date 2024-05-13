@@ -3,8 +3,8 @@ use std::collections::VecDeque;
 use crate::{instr::Instr, op};
 use thiserror::Error;
 
-#[derive(Debug)]
-enum Value {
+#[derive(Debug, Clone, Copy)]
+pub enum Value {
     Integer(i64),
 }
 
@@ -22,6 +22,12 @@ pub enum InterpreterError {
 
     #[error("Invalid type: Expected {0:?}, got {1:?}")]
     InvalidType(Value, Value),
+
+    #[error("Division by zero")]
+    DivByZero,
+    
+    #[error("Division (modulo) by zero")]
+    ModByZero,
 }
 
 impl VM {
@@ -53,19 +59,58 @@ impl VM {
                 }
                 op::Op::Add => {
                     println!("> add");
-                    let b = self.pop_stack_top()?;
-                    let a = self.pop_stack_top()?;
-
-                    if let Value::Integer(b) = b {
-                        if let Value::Integer(a) = a {
-                            self.stack.push_back(Value::Integer(a + b));
-                        } else {
-                            return Err(InterpreterError::InvalidType(Value::Integer(0), a));
-                        }
-                    } else {
-                        return Err(InterpreterError::InvalidType(Value::Integer(0), a));
-                    }
+                    self.transform_top_two_integers(|a, b| Ok(a + b))?;
                 }
+                op::Op::Inc => {
+                    println!("> inc");
+                    self.transform_top_integer(|a| *a += 1)?;
+                }
+                op::Op::Dec => {
+                    println!("> dec");
+                    self.transform_top_integer(|a| *a -= 1)?;
+                }
+                op::Op::Sub => {
+                    println!("> sub");
+                    self.transform_top_two_integers(|a, b| Ok(a - b))?;
+                }
+                op::Op::Mul => {
+                    println!("> mul");
+                    self.transform_top_two_integers(|a, b| Ok(a * b))?;
+                }
+                op::Op::Div => {
+                    println!("> div");
+                    self.transform_top_two_integers(|a, b| {
+                        if b == 0 {
+                            Err(InterpreterError::DivByZero)
+                        } else {
+                            Ok(a / b)
+                        }
+                    })?;
+                }
+                op::Op::Mod => {
+                    self.transform_top_two_integers(|a, b| {
+                        if b == 0 {
+                            Err(InterpreterError::ModByZero)
+                        } else {
+                            Ok(a % b)
+                        }
+                    })?;
+                }
+                op::Op::Halt => todo!(),
+                op::Op::Dup => todo!(),
+                op::Op::Dup2 => todo!(),
+                op::Op::Swap => todo!(),
+                op::Op::Clear => todo!(),
+                op::Op::Over => todo!(),
+                op::Op::Je => todo!(),
+                op::Op::Jn => todo!(),
+                op::Op::Jg => todo!(),
+                op::Op::Jl => todo!(),
+                op::Op::Jge => todo!(),
+                op::Op::Jle => todo!(),
+                op::Op::Jmp => todo!(),
+                op::Op::Jz => todo!(),
+                op::Op::Jnz => todo!(),
                 _ => todo!("Op::{:?}", instr.op),
             }
         }
@@ -74,6 +119,44 @@ impl VM {
 
     fn pop_stack_top(&mut self) -> Result<Value, InterpreterError> {
         self.stack.pop_back().ok_or(InterpreterError::StackEmpty)
+    }
+
+    /// Transforms the top two integers with the given function,
+    /// pushes the result back onto the stack.
+    fn transform_top_two_integers(
+        &mut self,
+        f: impl Fn(i64, i64) -> Result<i64, InterpreterError>,
+    ) -> Result<(), InterpreterError> {
+        let b = self.pop_stack_top()?;
+        let a = self.pop_stack_top()?;
+        if let Value::Integer(b) = b {
+            if let Value::Integer(a) = a {
+                self.stack.push_back(Value::Integer(f(a, b)?));
+            } else {
+                return Err(InterpreterError::InvalidType(Value::Integer(0), a));
+            }
+        } else {
+            return Err(InterpreterError::InvalidType(Value::Integer(0), a));
+        }
+        Ok(())
+    }
+
+    fn transform_top_integer(
+        &mut self,
+        f: impl Fn(&mut i64) -> (),
+    ) -> Result<(), InterpreterError> {
+        if let Some(mut back_value) = self.stack.back_mut() {
+            if let Value::Integer(back) = &mut back_value {
+                Ok(f(back))
+            } else {
+                Err(InterpreterError::InvalidType(
+                    Value::Integer(0),
+                    back_value.clone(),
+                ))
+            }
+        } else {
+            return Err(InterpreterError::StackEmpty);
+        }
     }
 }
 
