@@ -96,12 +96,30 @@ impl VM {
                         }
                     })?;
                 }
-                op::Op::Halt => todo!(),
-                op::Op::Dup => todo!(),
+                op::Op::Halt => {
+                    println!("> halt");
+                    return Ok(());
+                }
+                op::Op::Dup => {
+                    println!("> dup");
+                    if let Some(top) = self.stack.back() {
+                        self.stack.push_back(*top);
+                    } else {
+                        return Err(InterpreterError::StackEmpty);
+                    }
+                }
                 op::Op::Dup2 => todo!(),
                 op::Op::Swap => todo!(),
                 op::Op::Clear => todo!(),
-                op::Op::Over => todo!(),
+                op::Op::Over => {
+                    println!("> over");
+                    let len = self.stack.len();
+                    if len < 2 {
+                        // TODO: Come up with a better error
+                        return Err(InterpreterError::StackEmpty);
+                    }
+                    self.stack.push_back(self.stack[len - 2]);
+                }
                 op::Op::Je => todo!(),
                 op::Op::Jn => todo!(),
                 op::Op::Jg => todo!(),

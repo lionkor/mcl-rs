@@ -1,4 +1,6 @@
-push 1001
-push  999
-add
-print
+push 1
+push 2
+over
+over
+halt
+
