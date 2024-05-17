@@ -3,7 +3,7 @@ mod instr;
 mod interpreter;
 mod op;
 
-use std::{fs, path, process::exit, io::Write};
+use std::{fs, io::Write, path, process::exit};
 
 use clap::Parser;
 
@@ -55,7 +55,8 @@ fn main() -> anyhow::Result<()> {
         vm.execute(bytecode)?;
     } else {
         // create bytecode file
-        let mut new_file: fs::File = fs::File::create(path::Path::new(&args.file).with_extension("mclb"))?;
+        let mut new_file: fs::File =
+            fs::File::create(path::Path::new(&args.file).with_extension("mclb"))?;
         new_file.write_all(interpreter::encode_instructions(&bytecode[..])?.as_slice())?;
     }
 

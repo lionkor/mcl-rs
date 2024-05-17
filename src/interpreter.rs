@@ -25,7 +25,7 @@ pub enum InterpreterError {
 
     #[error("Division by zero")]
     DivByZero,
-    
+
     #[error("Division (modulo) by zero")]
     ModByZero,
 }
