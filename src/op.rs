@@ -1,6 +1,6 @@
 use strum::FromRepr;
 
-#[derive(Debug, FromRepr, Copy, Clone)]
+#[derive(Debug, FromRepr, Copy, Clone, PartialEq, PartialOrd)]
 #[repr(u8)]
 pub enum Op {
     Pop = 0x01,

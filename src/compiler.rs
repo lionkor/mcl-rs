@@ -64,32 +64,15 @@ fn compile_to_instrs(tokens: &[Token]) -> Result<Vec<Instr>, String> {
             break;
         }
         match tail {
-            [Token::Op(Op::Push), Token::Value(value), rest @ ..] => {
+            [Token::Op(op), rest @ ..] if *op < Op::Push => {
+                tail = rest;
+                result.push(Instr { op: *op, value: 0 })
+            }
+            [Token::Op(op), Token::Value(value), rest @ ..] if *op >= Op::Push => {
                 tail = rest;
                 result.push(Instr {
-                    op: Op::Push,
+                    op: *op,
                     value: *value,
-                })
-            }
-            [Token::Op(Op::Pop), rest @ ..] => {
-                tail = rest;
-                result.push(Instr {
-                    op: Op::Pop,
-                    value: 0,
-                })
-            }
-            [Token::Op(Op::Add), rest @ ..] => {
-                tail = rest;
-                result.push(Instr {
-                    op: Op::Add,
-                    value: 0,
-                })
-            }
-            [Token::Op(Op::Print), rest @ ..] => {
-                tail = rest;
-                result.push(Instr {
-                    op: Op::Print,
-                    value: 0,
                 })
             }
             tok => return Err(format!("Invalid token! Expected Op, got '{:?}'", tok)),
