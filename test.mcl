@@ -1,6 +1,13 @@
 push 1
-push 2
-over
-over
-halt
 
+inc
+dup
+print
+jmp :hello
+
+
+:hello
+inc
+dup
+print
+jmp :hello

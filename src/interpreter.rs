@@ -38,7 +38,10 @@ impl VM {
     }
 
     pub fn execute(&mut self, bytecode: Vec<Instr>) -> Result<(), InterpreterError> {
-        for instr in bytecode {
+        let mut pc = 0;
+        loop {
+            let instr = &bytecode[pc];
+            let mut next_pc = pc + 1;
             println!(">> stack: (bottom) {:?} (top)", self.stack);
             match instr.op {
                 op::Op::Push => {
@@ -126,10 +129,16 @@ impl VM {
                 op::Op::Jl => todo!(),
                 op::Op::Jge => todo!(),
                 op::Op::Jle => todo!(),
-                op::Op::Jmp => todo!(),
+                op::Op::Jmp => {
+                    next_pc = instr.value as usize;
+                }
                 op::Op::Jz => todo!(),
                 op::Op::Jnz => todo!(),
                 _ => todo!("Op::{:?}", instr.op),
+            }
+            pc = next_pc;
+            if pc >= bytecode.len() {
+                break;
             }
         }
         Ok(())
